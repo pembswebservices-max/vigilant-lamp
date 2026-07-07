@@ -1,0 +1,9 @@
+# Get this from @BotFather on Telegram after /newbot
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+
+# Get this from developer.ebay.com once approved. Not needed yet — mock data is used until then.
+EBAY_APP_ID=
+
+# How often (minutes) the background scheduler checks all alerts.
+# Only matters on always-on hosting — irrelevant while using /checknow manually.
+CHECK_INTERVAL_MINUTES=5
