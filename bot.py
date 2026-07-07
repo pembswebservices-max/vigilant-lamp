@@ -279,12 +279,25 @@ def main():
 
     # Background scheduler — only actually useful on always-on hosting.
     # On free-tier Render, use /checknow manually instead while developing.
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(lambda: app.create_task(run_checks(app.bot)), "interval", minutes=CHECK_INTERVAL_MINUTES)
-    scheduler.start()
+    # IMPORTANT: the scheduler must be started AFTER Telegram's own event loop
+    # is already running, not before — so we hook it into post_init rather
+    # than starting it directly in main(). Starting it too early is what
+    # caused the "no current event loop" crash.
+    async def on_startup(application: Application):
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(
+            lambda: application.create_task(run_checks(application.bot)),
+            "interval",
+            minutes=CHECK_INTERVAL_MINUTES,
+        )
+        scheduler.start()
+        logger.info("Scheduler started.")
+
+    app.post_init = on_startup
 
     logger.info("Bot starting...")
     app.run_polling()
+
 
 
 if __name__ == "__main__":
